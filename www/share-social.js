@@ -30,7 +30,7 @@ ShareSocial.prototype.share = function(message, image, url, title, successCallba
 	   success(args);
 	}, function(args) {
 	   fail(args);
-	}, 'ShareSocial', 'share', [message, image || "", url]);
+	}, 'ShareSocial', 'share', [message, image || "", url, title]);
 };
 
 ShareSocial.install = function() {
