@@ -14,5 +14,5 @@
 }
 - (void) available:(CDVInvokedUrlCommand*)command;
 - (void) share:(CDVInvokedUrlCommand*)command;
-- (void) showActivities:(NSArray *)list;
+- (void) showActivities:(NSArray *)list : (NSDictionary *) activityConfig;
 @end
