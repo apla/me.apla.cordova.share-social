@@ -15,16 +15,30 @@
 
 @implementation ShareSocial
 
+- (void)available:(CDVInvokedUrlCommand*)command;
+{
+    BOOL avail = false;
+
+    if (NSClassFromString(@"UIActivityViewController"))
+    {
+        avail = true;
+    }
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:avail];
+
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:[command callbackId]];
+}
+
 - (void)share:(CDVInvokedUrlCommand*)command {
-    
+
     CDVPluginResult *result;
-    
+
     if (!NSClassFromString(@"UIActivityViewController")) {
         result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsArray:@[@0, @"Social framework not available"]];
         [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
         return;
     }
-    
+
     NSString *text = [command.arguments objectAtIndex:0];
     if (!text) {
         result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsArray:@[@1, @"Text cannot be empty"]];
@@ -34,7 +48,7 @@
 
     NSString *urlString = [command.arguments objectAtIndex:2];
     NSURL *url = nil;
-    
+
     if (urlString && [urlString isKindOfClass:[NSString class]] && [urlString length] > 0) {
         url = [NSURL URLWithString:urlString];
     } else {
@@ -42,12 +56,12 @@
         [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
         return;
     }
-    
+
     NSMutableArray *activityItems = [[NSMutableArray alloc] initWithObjects:text, url, nil];
-    
+
     NSString *imageName = [command.arguments objectAtIndex:1];
     __block UIImage *image = nil;
-    
+
     // can be NSNull or empty string
     if (imageName && [imageName isKindOfClass:[NSString class]] && [imageName length] > 0) {
         NSURL *remoteImage = [[NSURL alloc] initWithString:imageName];
@@ -68,7 +82,7 @@
             {
                 if ([data length] > 0 && error == nil) {
                     image = [UIImage imageWithData:data];
-                    
+
                     if (image) {
                         [activityItems addObject:image];
                         [self showActivities:activityItems];
@@ -84,19 +98,19 @@
                 //     [delegate timedOut];
                 // else if (error != nil)
                 //     [delegate downloadError:error];
-                
+
                 CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsArray:@[@3, @"Image fetch error"]];
                 [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
                 return;
-                
+
             }];
             return;
         }
-        
+
     }
-    
+
     if (image) [activityItems addObject:image];
-    
+
     [self showActivities:activityItems];
     // TODO: add controller delegation. purpose: prevent two sharing dialogs
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -105,7 +119,7 @@
 
 -(void) showActivities: (NSArray *)list {
     UIActivity *activity = [[UIActivity alloc] init];
-    
+
     NSArray *applicationActivities = [[NSArray alloc] initWithObjects:activity, nil];
     UIActivityViewController *activityVC =
     [[UIActivityViewController alloc] initWithActivityItems:list
