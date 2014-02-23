@@ -16,7 +16,7 @@
 @implementation ShareSocial
 
 - (void)share:(CDVInvokedUrlCommand*)command {
-    
+
     CDVPluginResult *result;
     
     if (!NSClassFromString(@"UIActivityViewController")) {
@@ -41,6 +41,13 @@
         result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsArray:@[@2, @"URL cannot be empty"]];
         [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
         return;
+    }
+    
+    // If there is a title specified, use it as the subject of the email too.
+    NSMutableDictionary *activityConfig = [[NSMutableDictionary alloc] init];
+    NSString *title = [command argumentAtIndex:3 withDefault:NULL];
+    if (title != NULL) {
+        [activityConfig setObject:title forKey:@"subject"];
     }
     
     NSMutableArray *activityItems = [[NSMutableArray alloc] initWithObjects:text, url, nil];
@@ -71,7 +78,7 @@
                     
                     if (image) {
                         [activityItems addObject:image];
-                        [self showActivities:activityItems];
+                        [self showActivities:activityItems :activityConfig];
                         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
                         [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
                         return;
@@ -97,19 +104,21 @@
     
     if (image) [activityItems addObject:image];
     
-    [self showActivities:activityItems];
+    [self showActivities:activityItems: activityConfig];
     // TODO: add controller delegation. purpose: prevent two sharing dialogs
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:result callbackId:[command callbackId]];
 }
 
--(void) showActivities: (NSArray *)list {
+-(void) showActivities: (NSArray *)list : (NSDictionary*) activityConfig {
     UIActivity *activity = [[UIActivity alloc] init];
     
     NSArray *applicationActivities = [[NSArray alloc] initWithObjects:activity, nil];
     UIActivityViewController *activityVC =
     [[UIActivityViewController alloc] initWithActivityItems:list
                                       applicationActivities:applicationActivities];
+    [activityVC setValuesForKeysWithDictionary:activityConfig];
+
     [self.viewController presentViewController:activityVC animated:YES completion:nil];
     // TODO: add controller delegation. purpose: prevent two sharing dialogs
 }
