@@ -40,8 +40,9 @@ public class ShareSocial extends CordovaPlugin {
 				String msg = args.getString(0);
 				String img = args.getString(1);
 				String url = args.getString(2);
+				String title = args.getString(3);
 				
-				startSocialActivity(msg, img, url);
+				startSocialActivity(msg, img, url, title);
 			}
 			
 		}
@@ -79,7 +80,7 @@ public class ShareSocial extends CordovaPlugin {
 		// this.ctx.startActivity(emailIntent); 
 	}
 	
-	public void startSocialActivity (String msg, String img, String url)
+	public void startSocialActivity (String msg, String img, String url, String title)
 	{
 		// Intent share = new Intent(Intent.ACTION_SEND);
 		// share.setType("image/jpeg") // might be text, sound, whatever
@@ -88,11 +89,11 @@ public class ShareSocial extends CordovaPlugin {
 
 		Intent richIntent = new Intent(Intent.ACTION_SEND);
 		richIntent.setType("text/plain");
-		// richIntent.putExtra(Intent.EXTRA_TEXT, msg );
-		richIntent.putExtra(Intent.EXTRA_TEXT, msg);
-		richIntent.putExtra(Intent.EXTRA_TEXT, url);
-//		Intent.Ex
-		
+		// Note: can only set EXTRA_TEXT once.
+		richIntent.putExtra(Intent.EXTRA_TEXT, msg + "\n\n" + url);
+		// May or may not be used by recipient. Works on Android 4.4 w email.
+		richIntent.putExtra(Intent.EXTRA_SUBJECT, title);
+
 		cordova.getActivity().startActivity(Intent.createChooser(richIntent, "")); 
 	}
 	
